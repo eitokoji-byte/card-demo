@@ -6,8 +6,6 @@ const layoutEl = document.getElementById("layout");
 const fontEl = document.getElementById("font");
 const tplEl = document.getElementById("tpl");
 
-let uploadedImage = null;
-
 const fontMap = {
   gothic: "bold 48px 'Noto Sans JP', sans-serif",
   mincho: "bold 48px 'Noto Serif JP', serif",
@@ -21,22 +19,20 @@ const backgrounds = {
   C: "./assets/bg-c.png"
 };
 
-// 画像アップロード処理
-document.getElementById("file").addEventListener("change", (e) => {
+let uploadedImage = null;
+
+document.getElementById("upload").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function (event) {
+  reader.onload = () => {
     uploadedImage = new Image();
-    uploadedImage.src = event.target.result;
-    uploadedImage.onload = () => {
-      draw();
-    };
+    uploadedImage.onload = () => draw(); // 再描画
+    uploadedImage.src = reader.result;
   };
   reader.readAsDataURL(file);
 });
 
-// プレビューボタン
 document.getElementById("btn-preview").addEventListener("click", () => {
   draw();
 });
@@ -54,18 +50,17 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
-    // 写真（アップロード画像）を中央に描画
+    const imgWidth = canvas.width / 2;
+    const imgHeight = canvas.height / 2;
+    const imgX = (canvas.width - imgWidth) / 2;
+    const imgY = (canvas.height - imgHeight) / 2;
+
     if (uploadedImage) {
-      const imgWidth = canvas.width / 2;
-      const imgHeight = canvas.height / 2;
-      const imgX = (canvas.width - imgWidth) / 2;
-      const imgY = (canvas.height - imgHeight) / 2;
       ctx.drawImage(uploadedImage, imgX, imgY, imgWidth, imgHeight);
     }
 
-    // メッセージ描画
     ctx.fillStyle = "#000";
-    ctx.font = fontMap[font] || fontMap.gothic;
+    ctx.font = fontMap[font] || fontMap["gothic"];
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -78,12 +73,9 @@ function draw() {
   };
 }
 
-// PNG保存
 document.getElementById("btn-dl").addEventListener("click", () => {
   const link = document.createElement("a");
   link.download = "message.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
-
-
