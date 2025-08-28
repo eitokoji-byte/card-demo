@@ -31,6 +31,7 @@ document.getElementById("btn-dl").addEventListener("click", () => {
 // 背景とレイアウトの変更で再描画
 document.getElementById("tpl").addEventListener("change", draw);
 document.getElementById("layout").addEventListener("change", draw);
+document.getElementById("font").addEventListener("change", draw);
 
 // ===== 描画処理 =====
 async function draw() {
@@ -108,4 +109,5 @@ function contain(sw, sh, dw, dh) {
 
 // 初期描画（背景だけでも出す）
 draw();
+
 
