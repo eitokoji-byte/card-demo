@@ -9,7 +9,6 @@ const tplEl = document.getElementById("tpl");
 let uploadedImage = null;
 
 const fontMap = {
-  basic: "bold 48px sans-serif",
   gothic: "bold 48px 'Noto Sans JP', sans-serif",
   mincho: "bold 48px 'Noto Serif JP', serif",
   maru: "bold 48px 'Zen Maru Gothic', sans-serif",
@@ -67,7 +66,7 @@ function draw() {
 
     // メッセージ描画
     ctx.fillStyle = "#000";
-    ctx.font = fontMap[font] || fontMap.basic;
+    ctx.font = fontMap[font] || fontMap.gothic;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -87,4 +86,5 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
+
 
