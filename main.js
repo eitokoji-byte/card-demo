@@ -1,4 +1,3 @@
-<script>
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
@@ -22,30 +21,21 @@ const backgrounds = {
 
 let uploadedImage = null;
 
-// アップロード画像を読み込み
-document.getElementById("upload").addEventListener("change", (e) => {
+// ✅ 修正済み：inputのIDは "file"
+document.getElementById("file").addEventListener("change", (e) => {
   const reader = new FileReader();
   reader.onload = function (event) {
     const img = new Image();
     img.onload = function () {
       uploadedImage = img;
+      draw(); // 読み込んだら即描画
     };
     img.src = event.target.result;
   };
   reader.readAsDataURL(e.target.files[0]);
 });
 
-// 画像読み込み用のPromise関数
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-// メイン描画関数
+// プレビュー描画
 async function draw() {
   const message = messageEl.value || "テスト表示";
   const layout = layoutEl.value;
@@ -57,6 +47,7 @@ async function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
+  // アップロード画像
   if (uploadedImage) {
     const imgWidth = canvas.width / 2;
     const imgHeight = canvas.height / 2;
@@ -65,6 +56,7 @@ async function draw() {
     ctx.drawImage(uploadedImage, imgX, imgY, imgWidth, imgHeight);
   }
 
+  // テキスト
   ctx.fillStyle = "#000";
   ctx.font = fontMap[font] || fontMap.gothic;
   ctx.textAlign = "center";
@@ -78,16 +70,28 @@ async function draw() {
   ctx.fillText(message, canvas.width / 2, y);
 }
 
-// プレビューボタン
-document.getElementById("btn-preview").addEventListener("click", () => {
-  draw();
-});
+// 背景切り替え・フォント・レイアウト変更時も描画
+document.getElementById("tpl").addEventListener("change", draw);
+document.getElementById("font").addEventListener("change", draw);
+document.getElementById("layout").addEventListener("change", draw);
 
-// ダウンロードボタン
+// プレビュー更新ボタン
+document.getElementById("btn-preview").addEventListener("click", draw);
+
+// PNG保存
 document.getElementById("btn-dl").addEventListener("click", () => {
   const link = document.createElement("a");
   link.download = "message.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
-</script>
+
+// 画像読み込み Promise
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
