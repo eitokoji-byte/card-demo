@@ -54,15 +54,25 @@ async function draw() {
     ctx.drawImage(img, x, y, fit.w, fit.h);
   }
 
-  // メッセージ
-  const msg = document.getElementById("message").value;
-  if (msg) {
-    ctx.font = "700 40px sans-serif";
-    ctx.fillStyle = "#222";
-    ctx.textAlign = "center";
-    ctx.fillText(msg, W / 2, H * 0.9);
+// メッセージ
+const msg = document.getElementById("message").value;
+if (msg) {
+  ctx.font = "700 40px sans-serif";
+  ctx.fillStyle = "#222";
+  ctx.textAlign = "center";
+
+  // 文字配置セレクトの値を取得
+  const layout = document.getElementById("layout").value;
+  let yPos = canvas.height * 0.9; // デフォルトは下
+  if (layout === "top") {
+    yPos = canvas.height * 0.1;
+  } else if (layout === "middle") {
+    yPos = canvas.height * 0.5;
   }
+
+  ctx.fillText(msg, canvas.width / 2, yPos);
 }
+
 
 // ===== ユーティリティ関数 =====
 function loadImage(url) {
@@ -82,3 +92,4 @@ function contain(sw, sh, dw, dh) {
     return { h: dh, w: Math.round(dh * sr) };
   }
 }
+
