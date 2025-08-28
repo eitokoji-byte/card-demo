@@ -86,3 +86,4 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
+
