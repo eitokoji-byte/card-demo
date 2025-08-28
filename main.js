@@ -1,111 +1,105 @@
+// フォントマップ
+const FONT_CSS = {
+  "basic": "36px sans-serif",
+  "gothic": "36px 'Yu Gothic', 'Meiryo', sans-serif",
+  "mincho": "36px 'Hiragino Mincho ProN', 'Yu Mincho', serif",
+  "maru": "36px 'Hiragino Maru Gothic ProN', 'Yu Gothic', sans-serif",
+  "hand": "36px 'Caveat', 'Zen Maru Gothic', cursive",
+};
+
+// Google Fonts読み込み
+const fontsReady = new FontFaceObserver("Caveat").load().catch(() => {});
+Promise.all([fontsReady]);
+
+// 背景テンプレート画像
+const backgrounds = {
+  A: "./bg-a.png",
+  B: "./bg-b.png",
+  C: "./bg-c.png"
+};
+
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-let img = null;
 
-// ===== 背景テンプレ =====
-const TEMPLATE = {
-  A: "./assets/bg-a.png",
-  B: "./assets/bg-b.png",
-  C: "./assets/bg-c.png",
-};
+const fileEl = document.getElementById("file");
+const messageEl = document.getElementById("message");
+const dlEl = document.getElementById("btn-dl");
+const previewEl = document.getElementById("btn-preview");
+const tplEl = document.getElementById("tpl");
+const layoutEl = document.getElementById("layout");
+const fontEl = document.getElementById("font");
 
-// ===== フォント定義（Google Fontsを使用） =====
-// Yomogi は Regular(400)のみ。その他は 700 を使う。
-const FONT_CSS = {
-  basic: "700 40px 'Noto Sans JP', system-ui, sans-serif",         // ベーシック（ゴシック）
-  hand:  "400 40px 'Yomogi', 'Hiragino Maru Gothic Pro', sans-serif", // 手書き風
-  cute:  "700 40px 'Zen Maru Gothic', 'Kosugi Maru', sans-serif",  // まるっこい
-};
+let photo = null;
 
-// Webフォント読み込み完了を待つ
-const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-
-// ===== イベント登録 =====
-document.getElementById("file").addEventListener("change", async (e) => {
-  const f = e.target.files?.[0];
-  if (!f) return;
-  img = await loadImage(URL.createObjectURL(f));
-  draw();
+fileEl.addEventListener("change", () => {
+  const file = fileEl.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      photo = img;
+      draw();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 });
 
-document.getElementById("btn-preview").addEventListener("click", draw);
+previewEl.addEventListener("click", () => draw());
 
-document.getElementById("btn-dl").addEventListener("click", () => {
+dlEl.addEventListener("click", () => {
   const a = document.createElement("a");
   a.href = canvas.toDataURL("image/png");
-  a.download = "card.png";
+  a.download = "message_card.png";
   a.click();
 });
 
-document.getElementById("tpl").addEventListener("change", draw);
-document.getElementById("layout").addEventListener("change", draw);
-document.getElementById("font").addEventListener("change", draw);
+function draw() {
+  const bgKey = tplEl.value;
+  const bgImg = new Image();
+  bgImg.src = backgrounds[bgKey];
 
-// ===== 描画処理 =====
-async function draw() {
-  await fontsReady; // フォント読み込みを待つ
+  bgImg.onload = () => {
+    // 背景描画
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
+    // 写真描画
+    if (photo) {
+      const pw = 400, ph = 400;
+      const px = (canvas.width - pw) / 2;
+      const py = 80;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px + pw / 2, py + ph / 2, pw / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(photo, px, py, pw, ph);
+      ctx.restore();
+    }
 
-  // 背景
-  const tplKey = document.getElementById("tpl").value;
-  const bgUrl = TEMPLATE[tplKey];
-  if (bgUrl) {
-    const bg = await loadImage(bgUrl);
-    ctx.drawImage(bg, 0, 0, W, H);
-  } else {
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, W, H);
-  }
-
-  // 写真（中央寄せ）
-  if (img) {
-    const fit = contain(img.width, img.height, Math.floor(W * 0.9), Math.floor(H * 0.6));
-    const x = (W - fit.w) / 2, y = Math.floor(H * 0.1);
-    ctx.drawImage(img, x, y, fit.w, fit.h);
-  }
-
-  // メッセージ
-  const msg = document.getElementById("message").value || "";
-  if (msg) {
-    const fontSel = document.getElementById("font")?.value || "basic";
-    ctx.font = FONT_CSS[fontSel] || FONT_CSS.basic;
-    ctx.fillStyle = "#222";
+    // フォント設定
+    const fontSel = fontEl && fontEl.value in FONT_CSS ? fontEl.value : "basic";
+    ctx.font = FONT_CSS[fontSel];
+    ctx.fillStyle = "#000";
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.textBaseline = "top";
 
-    const layout = document.getElementById("layout").value; // top/middle/bottom
-    const yBase =
-      layout === "top" ? Math.floor(H * 0.1) :
-      layout === "middle" ? Math.floor(H * 0.5) :
-      Math.floor(H * 0.9);
+    const text = messageEl.value;
+    const lines = text.split(/\r?\n/);
 
-    // 改行対応
-    const lines = msg.split("\n");
-    const lineHeight = 44;
-    const startY = yBase - ((lines.length - 1) * lineHeight) / 2;
+    const layout = layoutEl.value;
+    let y = 0;
+    if (layout === "top") y = 500;
+    else if (layout === "middle") y = 600 - (lines.length * 40) / 2;
+    else if (layout === "bottom") y = 700 - lines.length * 40;
+
     lines.forEach((line, i) => {
-      ctx.fillText(line, W / 2, startY + i * lineHeight);
+      ctx.fillText(line, canvas.width / 2, y + i * 40);
     });
-  }
+  };
 }
 
-// ===== ユーティリティ =====
-function loadImage(url) {
-  return new Promise((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = rej;
-    i.src = url;
-  });
-}
-
-function contain(sw, sh, dw, dh) {
-  const sr = sw / sh, dr = dw / dh;
-  if (sr > dr) return { w: dw, h: Math.round(dw / sr) };
-  return { h: dh, w: Math.round(dh * sr) };
-}
-
-// 初期描画
-draw();
+// 初回描画
+fontsReady.then(() => draw());
