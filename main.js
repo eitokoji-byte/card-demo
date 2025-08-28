@@ -55,28 +55,39 @@ async function draw() {
     ctx.drawImage(img, x, y, fit.w, fit.h);
   }
 
-  // メッセージ
-  const msg = document.getElementById("message").value || "";
-  if (msg) {
-    ctx.font = "700 40px sans-serif";
-    ctx.fillStyle = "#222";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle"; // ←縦位置の基準を中央に
-
-    const layout = document.getElementById("layout").value; // top/middle/bottom
-    const yBase =
-      layout === "top" ? Math.floor(H * 0.1) :
-      layout === "middle" ? Math.floor(H * 0.5) :
-      Math.floor(H * 0.9);
-
-    // 改行対応・行間調整
-    const lines = msg.split("\n");
-    const lineHeight = 44;
-    const startY = yBase - ((lines.length - 1) * lineHeight) / 2;
-    lines.forEach((line, i) => {
-      ctx.fillText(line, W / 2, startY + i * lineHeight);
-    });
+// メッセージ
+const msg = document.getElementById("message").value || "";
+if (msg) {
+  // フォントセレクトを反映
+  const fontSel = document.getElementById("font").value;
+  let fontCss;
+  if (fontSel === "serif") {
+    fontCss = "700 40px 'Noto Serif JP', serif";
+  } else if (fontSel === "rounded") {
+    fontCss = "700 40px 'Hiragino Maru Gothic Pro', 'Rounded Mplus 1c', sans-serif";
+  } else {
+    fontCss = "700 40px 'Noto Sans JP', system-ui, sans-serif";
   }
+  ctx.font = fontCss;
+
+  ctx.fillStyle = "#222";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const layout = document.getElementById("layout").value;
+  const yBase =
+    layout === "top" ? Math.floor(H * 0.1) :
+    layout === "middle" ? Math.floor(H * 0.5) :
+    Math.floor(H * 0.9);
+
+  const lines = msg.split("\n");
+  const lineHeight = 44;
+  const startY = yBase - ((lines.length - 1) * lineHeight) / 2;
+  lines.forEach((line, i) => {
+    ctx.fillText(line, W / 2, startY + i * lineHeight);
+  });
+}
+
 }
 
 // ===== ユーティリティ =====
@@ -97,3 +108,4 @@ function contain(sw, sh, dw, dh) {
 
 // 初期描画（背景だけでも出す）
 draw();
+
