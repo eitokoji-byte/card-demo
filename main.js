@@ -2,6 +2,13 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 let img = null;
 
+// ===== 背景テンプレ定義 =====
+const TEMPLATE = {
+  A: "./assets/bg-a.png",
+  B: "./assets/bg-b.png",
+  C: "./assets/bg-c.png"
+};
+
 // ファイル読み込み
 document.getElementById("file").addEventListener("change", async (e) => {
   const f = e.target.files?.[0];
@@ -21,15 +28,26 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   a.click();
 });
 
-function draw() {
+// 背景セレクト変更イベント
+document.getElementById("tpl").addEventListener("change", draw);
+
+// ===== 描画処理 =====
+async function draw() {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  // 背景色
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, W, H);
+  // 背景テンプレ
+  const tplKey = document.getElementById("tpl").value;
+  const bgUrl = TEMPLATE[tplKey];
+  if (bgUrl) {
+    const bg = await loadImage(bgUrl);
+    ctx.drawImage(bg, 0, 0, W, H);
+  } else {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, W, H);
+  }
 
-  // 画像（中央配置）
+  // アップロード画像（中央配置）
   if (img) {
     const fit = contain(img.width, img.height, W * 0.9, H * 0.6);
     const x = (W - fit.w) / 2, y = H * 0.1;
@@ -46,6 +64,7 @@ function draw() {
   }
 }
 
+// ===== ユーティリティ関数 =====
 function loadImage(url) {
   return new Promise((res, rej) => {
     const i = new Image();
