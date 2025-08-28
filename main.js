@@ -17,10 +17,11 @@ const fontMap = {
 };
 
 const backgrounds = {
-  A: "./bg_a.jpg",
-  B: "./bg_b.jpg",
-  C: "./bg_c.jpg"
+  A: "./assets/bg-a.png",
+  B: "./assets/bg-b.png",
+  C: "./assets/bg-c.png"
 };
+
 
 // 画像アップロード処理
 document.getElementById("file").addEventListener("change", (e) => {
@@ -86,3 +87,4 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
+
