@@ -10,10 +10,11 @@ const TEMPLATE = {
 };
 
 // ===== フォント定義（Google Fontsを使用） =====
+// Yomogi は Regular(400)のみ。その他は 700 を使う。
 const FONT_CSS = {
-  sans:   "700 40px 'Noto Sans JP', system-ui, sans-serif",  // ゴシック
-  serif:  "700 40px 'Noto Serif JP', serif",                 // 明朝
-  rounded:"700 40px 'Kosugi Maru', 'Hiragino Maru Gothic Pro', 'Rounded Mplus 1c', sans-serif" // 丸ゴ
+  basic: "700 40px 'Noto Sans JP', system-ui, sans-serif",         // ベーシック（ゴシック）
+  hand:  "400 40px 'Yomogi', 'Hiragino Maru Gothic Pro', sans-serif", // 手書き風
+  cute:  "700 40px 'Zen Maru Gothic', 'Kosugi Maru', sans-serif",  // まるっこい
 };
 
 // Webフォント読み込み完了を待つ
@@ -68,8 +69,8 @@ async function draw() {
   // メッセージ
   const msg = document.getElementById("message").value || "";
   if (msg) {
-    const fontSel = document.getElementById("font")?.value || "sans";
-    ctx.font = FONT_CSS[fontSel] || FONT_CSS.sans;
+    const fontSel = document.getElementById("font")?.value || "basic";
+    ctx.font = FONT_CSS[fontSel] || FONT_CSS.basic;
     ctx.fillStyle = "#222";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
