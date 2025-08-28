@@ -72,6 +72,7 @@ if (msg) {
 
   ctx.fillText(msg, canvas.width / 2, yPos);
 }
+}
 
 
 // ===== ユーティリティ関数 =====
@@ -93,3 +94,4 @@ function contain(sw, sh, dw, dh) {
   }
 }
 
+document.getElementById("layout").addEventListener("change", draw);
