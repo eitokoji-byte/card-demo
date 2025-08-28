@@ -2,14 +2,14 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 let img = null;
 
-// ===== 背景テンプレ定義 =====
+// ===== 背景テンプレ =====
 const TEMPLATE = {
   A: "./assets/bg-a.png",
   B: "./assets/bg-b.png",
-  C: "./assets/bg-c.png"
+  C: "./assets/bg-c.png",
 };
 
-// ファイル読み込み
+// 画像読み込み
 document.getElementById("file").addEventListener("change", async (e) => {
   const f = e.target.files?.[0];
   if (!f) return;
@@ -28,15 +28,16 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   a.click();
 });
 
-// 背景セレクト変更イベント
+// 背景とレイアウトの変更で再描画
 document.getElementById("tpl").addEventListener("change", draw);
+document.getElementById("layout").addEventListener("change", draw);
 
 // ===== 描画処理 =====
 async function draw() {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  // 背景テンプレ
+  // 背景
   const tplKey = document.getElementById("tpl").value;
   const bgUrl = TEMPLATE[tplKey];
   if (bgUrl) {
@@ -47,35 +48,38 @@ async function draw() {
     ctx.fillRect(0, 0, W, H);
   }
 
-  // アップロード画像（中央配置）
+  // 写真（中央寄せ・レターボックス）
   if (img) {
-    const fit = contain(img.width, img.height, W * 0.9, H * 0.6);
-    const x = (W - fit.w) / 2, y = H * 0.1;
+    const fit = contain(img.width, img.height, Math.floor(W * 0.9), Math.floor(H * 0.6));
+    const x = (W - fit.w) / 2, y = Math.floor(H * 0.1);
     ctx.drawImage(img, x, y, fit.w, fit.h);
   }
 
-// メッセージ
-const msg = document.getElementById("message").value;
-if (msg) {
-  ctx.font = "700 40px sans-serif";
-  ctx.fillStyle = "#222";
-  ctx.textAlign = "center";
+  // メッセージ
+  const msg = document.getElementById("message").value || "";
+  if (msg) {
+    ctx.font = "700 40px sans-serif";
+    ctx.fillStyle = "#222";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle"; // ←縦位置の基準を中央に
 
-  // 文字配置セレクトの値を取得
-  const layout = document.getElementById("layout").value;
-  let yPos = canvas.height * 0.9; // デフォルトは下
-  if (layout === "top") {
-    yPos = canvas.height * 0.1;
-  } else if (layout === "middle") {
-    yPos = canvas.height * 0.5;
+    const layout = document.getElementById("layout").value; // top/middle/bottom
+    const yBase =
+      layout === "top" ? Math.floor(H * 0.1) :
+      layout === "middle" ? Math.floor(H * 0.5) :
+      Math.floor(H * 0.9);
+
+    // 改行対応・行間調整
+    const lines = msg.split("\n");
+    const lineHeight = 44;
+    const startY = yBase - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach((line, i) => {
+      ctx.fillText(line, W / 2, startY + i * lineHeight);
+    });
   }
-
-  ctx.fillText(msg, canvas.width / 2, yPos);
-}
 }
 
-
-// ===== ユーティリティ関数 =====
+// ===== ユーティリティ =====
 function loadImage(url) {
   return new Promise((res, rej) => {
     const i = new Image();
@@ -87,11 +91,9 @@ function loadImage(url) {
 
 function contain(sw, sh, dw, dh) {
   const sr = sw / sh, dr = dw / dh;
-  if (sr > dr) {
-    return { w: dw, h: Math.round(dw / sr) };
-  } else {
-    return { h: dh, w: Math.round(dh * sr) };
-  }
+  if (sr > dr) return { w: dw, h: Math.round(dw / sr) };
+  return { h: dh, w: Math.round(dh * sr) };
 }
 
-document.getElementById("layout").addEventListener("change", draw);
+// 初期描画（背景だけでも出す）
+draw();
