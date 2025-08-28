@@ -14,9 +14,9 @@ const fontMap = {
 };
 
 const backgrounds = {
-  A: "assets/bg-a.png",
-  B: "assets/bg-b.png",
-  C: "assets/bg-c.png"
+  A: "./assets/bg-a.png",
+  B: "./assets/bg-b.png",
+  C: "./assets/bg-c.png"
 };
 
 let uploadedImage = null;
@@ -79,3 +79,4 @@ document.getElementById("btn-dl").addEventListener("click", () => {
   link.href = canvas.toDataURL("image/png");
   link.click();
 });
+
