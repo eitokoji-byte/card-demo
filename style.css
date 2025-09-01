@@ -1,0 +1,56 @@
+:root{
+  --bg:#f7f7f7; --card:#fff; --border:#e5e7eb;
+  --text:#111827; --muted:#6b7280;
+  --primary:#16a34a; --primary-ink:#fff;
+  --secondary:#2563eb; --secondary-ink:#fff;
+  --radius:12px;
+}
+
+/* 全体 */
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  margin:0;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+.grid{display:block}
+@media(min-width:960px){
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+}
+
+/* カード */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+}
+
+/* ボタン */
+button{
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+}
+button.primary{background:var(--primary);color:var(--primary-ink)}
+button.secondary{background:var(--secondary);color:var(--secondary-ink)}
+button.ghost{background:#fff;border:1px solid var(--border);color:var(--text)}
+button:disabled{opacity:.6;cursor:not-allowed}
+
+/* ツールバー */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ステータス */
+#status{font-size:.9em;color:var(--muted)}
+
+/* プレビュー */
+canvas{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:#fff;
+}
