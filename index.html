@@ -1,117 +1,99 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>メッセージカード作成</title>
-  <link rel="stylesheet" href="./style.css" />
-
-  <!-- Google Fonts 最適化 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- 4フォントに統一：Noto Sans JP / Shippori Mincho / Zen Maru Gothic / Yomogi -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Shippori+Mincho:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Yomogi&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2? family=Noto+Sans+JP:wght@400;700
- &family=Shippori+Mincho:wght@400;700
- &family=Zen+Maru+Gothic:wght@400;700
- &family=Yomogi
- &display=swap".replace(/\s+/g,'') rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&family=Shippori+Mincho+B1&family=Zen+Maru+Gothic&family=Yomogi&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="wrap grid">
-  <!-- 左：設定UI -->
-  <div class="sidebar">
+  <div class="container">
     <h1>メッセージカード作成</h1>
 
-    <!-- 写真アップロード -->
-    <section class="card">
+    <div class="row">
       <label>写真アップロード</label>
-      <input id="file" type="file" accept="image/*;capture=camera" />
-    </section>
+      <input type="file" accept="image/*" id="photoInput">
+    </div>
 
-    <!-- 背景テンプレ -->
-    <section class="card">
+    <div class="row">
       <label>背景テンプレート</label>
-      <select id="tpl">
-        <option value="A">クラシック</option>
-        <option value="B">ナチュラル</option>
-        <option value="C">ポップ</option>
+      <select id="templateSelect">
+        <option value="classic">クラシック</option>
+        <option value="modern">モダン</option>
+        <option value="cute">キュート</option>
       </select>
-    </section>
+    </div>
 
-    <!-- メッセージ -->
-    <section class="card">
+    <div class="row">
       <label>メッセージ</label>
-      <textarea id="message" rows="3" placeholder="例：Happy Birthday!" style="width:100%"></textarea>
-      <div class="actions">
-        <!-- ※このプレビュー更新ボタンはツールバーにもあるので、ID重複に注意 -->
-        <button id="btn-preview" class="secondary">メッセージ更新</button>
-      </div>
-    </section>
+      <input type="text" id="messageInput" placeholder="例：Happy Birthday!">
+    </div>
 
-    <!-- 文字配置 -->
-    <section class="card">
+    <div class="row">
       <label>文字配置</label>
-      <select id="layout">
+      <select id="textAlign">
         <option value="top">上</option>
         <option value="middle">中央</option>
         <option value="bottom" selected>下</option>
       </select>
-    </section>
-
-    <!-- フォント -->
-    <section class="card">
-      <label>フォント選択</label>
-      <select id="font">
-        <option value="gothic">ゴシック（Noto Sans）</option>
-        <option value="mincho">明朝（Shippori）</option>
-        <option value="maru">丸ゴ（Zen Maru）</option>
-        <option value="hand">手書き風（Yomogi）</option>
-      </select>
-    </section>
-
-    <section class="card">
-      <label>文字サイズ</label><br>
-      <input id="font-size" type="range" min="28" max="72" value="48" />
-      <span id="font-size-val">48px</span>
-    </section>
-
-    <!-- 文字色 -->
-    <section class="card">
-      <label>文字色</label>
-      <input id="font-color" type="color" value="#000000" />
-    </section>
-
-    <!-- 操作ボタン -->
-    <div class="toolbar">
-      <button id="btn-preview" class="secondary">プレビュー更新</button>
-      <button id="btn-illustrate" class="secondary">イラスト化</button>
-      <button id="btn-toggle-guides" class="ghost">ガイド表示</button>
-      <button id="btn-decide" class="primary">決定（受注）</button>
-      <span id="status"></span>
     </div>
-  </div>
 
-  <!-- 右：プレビュー -->
-  <div class="preview">
-    <section class="card">
-      <label>プレビュー</label>
-      <canvas id="c" width="1200" height="800"></canvas>
-      <div class="actions">
-        <button id="btn-dl" class="ghost">PNGを保存</button>
-      </div>
-    </section>
-  </div>
-</div>
+    <!-- ガイド表示トグル -->
+    <div class="row">
+      <label>
+        <input type="checkbox" id="showGuides">
+        ガイド表示
+      </label>
+    </div>
 
-<!-- 画面外ウォームアップ（初回FOIT/レイアウトズレ対策） -->
+<!-- Google Fonts ウォームアップ -->
 <p aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px">
-  <span style="font-family:'Noto Sans JP',sans-serif;">暖機Warmup</span>
-  <span style="font-family:'Shippori Mincho',serif;">暖機Warmup</span>
-  <span style="font-family:'Zen Maru Gothic',sans-serif;">暖機Warmup</span>
-  <span style="font-family:'Yomogi',cursive;">暖機Warmup</span>
+  <span style="font-family:'Noto Sans JP',sans-serif;">Warmup</span>
+  <span style="font-family:'Shippori Mincho B1',serif;">Warmup</span>
+  <span style="font-family:'Zen Maru Gothic',sans-serif;">Warmup</span>
+  <span style="font-family:'Yomogi',cursive;">Warmup</span>
 </p>
 
-<script type="module" src="./main.js?v=2"></script>
+    <div class="row">
+      <label>フォント</label>
+      <select id="fontFamily">
+        <option value="noto">ゴシック（Noto Sans）</option>
+        <option value="shippori">明朝（Shippori）</option>
+        <option value="zenmaru">丸ゴ（Zen Maru）</option>
+        <option value="yomogi">手書き風（Yomogi）</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>文字サイズ</label>
+      <input type="range" min="24" max="64" value="36" id="fontSize">
+    </div>
+
+<div class="row">
+<label for="fontColor">文字色</label>
+<input type="color" id="fontColor" value="#cc0000" style="width: 60px; height: 40px; border: none; padding: 0;">
+</div>
+
+    <canvas id="previewCanvas"></canvas>
+
+
+<!-- プレビュー更新＆PNG保存（横並び） -->
+<div class="row" style="display: flex; gap: 8px;">
+  <button class="button" id="updatePreviewBtn" style="flex: 1;">プレビュー更新</button>
+  <button class="button" id="saveBtn" style="flex: 1;">画像を保存（サンプル）</button>
+</div>
+
+<!-- 注文完了（縦・赤ボタン） -->
+<div class="row" style="margin-top: 16px;">
+  <button class="button" id="completeBtn">この内容で注文を完了する</button>
+  <small style="display:block; margin-top:4px; color:#666;">
+    ※画像を保存しただけでは注文完了になりません。上のボタンを押してご注文を確定してください。
+  </small>
+  <div id="completeMessage" style="margin-top: 1em; display: none; color: green;"></div>
+</div>
+
+
+<script src="main.js"></script>
 </body>
 </html>
