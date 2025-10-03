@@ -22,16 +22,13 @@
     写真に白フチ＋影をつける
   </label>
 </div>
-    
-<label>
-  <input type="radio" name="photoFit" value="contain" checked>
-  全体表示（余白あり）
-</label>
-<label>
-  <input type="radio" name="photoFit" value="cover">
-  迫力表示（はみ出しあり）
-</label>
-
+    <div class="row">
+  <label>写真の表示方法</label>
+  <select id="photoFit">
+    <option value="cover" selected>迫力表示（はみ出しあり）</option>
+    <option value="contain">全体表示（余白あり）</option>
+  </select>
+</div>
 
     <div class="row">
       <label>背景テンプレート</label>
@@ -131,4 +128,5 @@
 
 </body>
 </html>
+
 
