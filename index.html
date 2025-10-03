@@ -16,6 +16,14 @@
       <input type="file" accept="image/*" id="photoInput">
     </div>
 
+<div class="row">
+  <label>
+    <input type="checkbox" id="frameToggle" checked>
+    写真に白フチ＋影をつける
+  </label>
+</div>
+
+
     <div class="row">
       <label>背景テンプレート</label>
       <select id="templateSelect">
@@ -34,10 +42,12 @@
       <label>文字配置</label>
       <select id="textAlign">
         <option value="top">上</option>
-        <option value="middle">中央</option>
+<!--        <option value="middle">中央</option>-->
         <option value="bottom" selected>下</option>
       </select>
     </div>
+
+    <label>
 
     <!-- ガイド表示トグル -->
     <div class="row">
@@ -84,6 +94,13 @@
   <button class="button" id="saveBtn" style="flex: 1;">画像を保存（サンプル）</button>
 </div>
 
+<!-- スマホ向け：生成画像を表示して保存できるようにする -->
+<div id="previewContainer" style="margin-top: 20px; display: none;">
+  <p>📱 画像が生成されました。<strong>長押しで保存</strong>できます。</p>
+  <img id="previewImage" style="width: 100%; max-width: 480px; border: 1px solid #ccc;" />
+  <button class="button" id="saveBtnMobile" style="margin-top: 8px;">画像をダウンロード</button>
+</div>
+
 <!-- 注文完了（縦・赤ボタン） -->
 <div class="row" style="margin-top: 16px;">
   <button class="button" id="completeBtn">この内容で注文を完了する</button>
@@ -94,6 +111,14 @@
 </div>
 
 
-<script src="main.js"></script>
+<script src="js/main.js"></script>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<!-- PDF生成用ライブラリ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<!-- バーコード生成用ライブラリ -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" defer></script>
+
+
 </body>
 </html>
