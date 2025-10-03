@@ -73,8 +73,8 @@ function drawCanvas() {
   const st = {
     ...state,
     bg: backgroundImages[templateSelect.value],
-    photo: uploadedImage,
     fit: photoFitSelect.value,
+    photo: uploadedImage,
     message: {
       text: messageInput.value || 'いつもありがとう！',
       pos: textAlignInput.value,
@@ -111,6 +111,7 @@ saveBtn.addEventListener('click', async () => {
   const st = {
     ...state,
     bg: backgroundImages[templateSelect.value],
+    fit: photoFitSelect.value,
     message: {
       text: messageInput.value || 'いつもありがとう！',
       pos: textAlignInput.value,
@@ -181,143 +182,82 @@ saveBtn.addEventListener('click', async () => {
 
   // ここをPHPアップロード用に変更
   completeBtn.addEventListener('click', async () => {
-    completeBtn.disabled = true;
-    completeBtn.textContent = '送信中...';
+  completeBtn.disabled = true;
+  completeBtn.textContent = '送信中...';
 
-    // === 保存専用キャンバスを作成（ガイド線なし） ===
-    const exportCanvas = document.createElement('canvas');
-    exportCanvas.width = canvas.width;
-    exportCanvas.height = canvas.height;
-    const exportCtx = exportCanvas.getContext('2d');
+  // === 保存専用キャンバスを作成（ガイド線なし） ===
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+  const exportCtx = exportCanvas.getContext('2d');
 
-    // 背景画像の再描画
-    const selectedTemplate = templateSelect.value;
-    const bgImage = new Image();
-    bgImage.src = backgroundImages[selectedTemplate];
+  // 共通の状態をまとめる
+  const st = {
+    ...state,
+    bg: backgroundImages[templateSelect.value],
+    photo: uploadedImage,
+    fit: photoFitSelect.value,  // cover/containの値を反映
+    message: {
+      text: messageInput.value || 'いつもありがとう！',
+      pos: textAlignInput.value,
+      font: (fontMap[fontFamilyInput.value] || fontMap.noto).replace(/['"]/g, ''),
+      color: fontColorInput.value
+    }
+  };
 
-    await new Promise((resolve) => {
-      bgImage.onload = () => {
-        exportCtx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+  // ★ここで drawCard を呼び出すだけにする
+  await drawCard(exportCtx, exportCanvas.width, exportCanvas.height, st, getOptions(MODE.PREVIEW));
 
-        // アップロード画像の再描画
-        if (uploadedImage) {
-          const maxWidth = canvas.width * 0.8;
-          const maxHeight = canvas.height * 0.8;
-          const imgRatio = uploadedImage.width / uploadedImage.height;
-          const canvasRatio = maxWidth / maxHeight;
+  // === PNG変換 & 送信 ===
+  const imageData = exportCanvas.toDataURL('image/png');
+  const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
 
-          let drawWidth, drawHeight;
-          if (imgRatio > canvasRatio) {
-            drawWidth = maxWidth;
-            drawHeight = maxWidth / imgRatio;
-          } else {
-            drawHeight = maxHeight;
-            drawWidth = maxHeight * imgRatio;
-          }
+  const orderId = `order_${Date.now()}`;
+  const backgroundType = templateSelect.value;
+  const messageText = messageInput.value || 'いつもありがとう！';
+  const fontType = fontFamilyInput.value;
+  const textAlign = textAlignInput.value;
 
-          const offsetX = (canvas.width - drawWidth) / 2;
-          const offsetY = (canvas.height - drawHeight) / 2;
+  const formData = new FormData();
+  formData.append("image", base64Data);
+  formData.append("filename", `${orderId}.png`);
+  formData.append("orderId", orderId);
+  formData.append("backgroundType", backgroundType);
+  formData.append("messageText", messageText);
+  formData.append("fontType", fontType);
+  formData.append("textAlign", textAlign);
 
-  // 枠があるときは白いフチを描く
-  const showFrame = document.getElementById('frameToggle')?.checked;
-  if (showFrame) {
-    exportCtx.save();
-    exportCtx.shadowColor = 'rgba(0,0,0,0.2)';
-    exportCtx.shadowBlur = 8;
-    exportCtx.fillStyle = 'white';
-    exportCtx.fillRect(offsetX - 6, offsetY - 6, drawWidth + 12, drawHeight + 12);
-    exportCtx.restore();
-  }
-
-
-          exportCtx.drawImage(uploadedImage, offsetX, offsetY, drawWidth, drawHeight);
-        }
-
-        // テキスト再描画（ガイドなし）
-        const text = messageInput.value || 'いつもありがとう！';
-        const fontSize = fontSizeInput.value;
-        const fontColor = fontColorInput.value;
-        const fontKey = fontFamilyInput.value;
-        const textAlign = textAlignInput.value;
-        const fontFamily = fontMap[fontKey] || fontMap.noto;
-
-let y;
-switch (textAlign) {
-  case 'top': y = canvas.height * 0.2; break;
-  //case 'middle': y = canvas.height / 2; break;
-  case 'bottom': y = canvas.height * 0.8; break;
-  default: y = canvas.height / 2;
-}
-const textBoxHeight = 80;
-const textBoxY = y - textBoxHeight / 2;
-
-
-  exportCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  exportCtx.fillRect(0, textBoxY, canvas.width, textBoxHeight);
-
-  exportCtx.fillStyle = fontColor;
-  exportCtx.textAlign = 'center';
-  exportCtx.textBaseline = 'middle';
-  exportCtx.font = `${fontSize}px ${fontFamily}`;
-  exportCtx.fillText(text, canvas.width / 2, textBoxY + textBoxHeight / 2);
-
-
-
-        resolve();
-      };
+  // 以降の fetch 処理は今まで通り
+  try {
+    const res = await fetch("https://test2.4phy.jp/message-card/upload.php", {
+      method: "POST",
+      body: formData
     });
 
-    // === PNG変換 & 送信 ===
-    const imageData = exportCanvas.toDataURL('image/png');
-    const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
+    const result = await res.json();
+    console.log(result);
 
-    const orderId = `order_${Date.now()}`;
-    const backgroundType = selectedTemplate;
-    const messageText = messageInput.value || 'いつもありがとう！';
-    const fontType = fontFamilyInput.value;
-    const textAlign = textAlignInput.value;
-
-    const formData = new FormData();
-    formData.append("image", base64Data);
-    formData.append("filename", `${orderId}.png`);
-    formData.append("orderId", orderId);
-    formData.append("backgroundType", backgroundType);
-    formData.append("messageText", messageText);
-    formData.append("fontType", fontType);
-    formData.append("textAlign", textAlign);
-
-    try {
-      const res = await fetch("https://test2.4phy.jp/message-card/upload.php", {
-        method: "POST",
-        body: formData
-      });
-
-      const result = await res.json();
-      console.log(result);
-
-      if (result.status === "success") {
-        completeMessage.innerHTML = `
-          ✅ ご注文が完了しました！<br>
-          <a href="${result.url}" target="_blank">保存された画像を確認する</a>
-        `;
-        completeMessage.style.color = 'green';
-        // PDF＋バーコード出力を追加
-        await prepareBarcode(orderId);        // ← orderIdからバーコード画像を生成
-        await exportPdf({ id: orderId });     // ← PDFファイルをダウンロード
-
-      } else {
-        throw new Error(result.message || "アップロード失敗");
-      }
-    } catch (err) {
-      console.error(err);
-      completeMessage.innerHTML = '⚠️ 注文に失敗しました。もう一度お試しください。';
-      completeMessage.style.color = 'red';
+    if (result.status === "success") {
+      completeMessage.innerHTML = `
+        ✅ ご注文が完了しました！<br>
+        <a href="${result.url}" target="_blank">保存された画像を確認する</a>
+      `;
+      completeMessage.style.color = 'green';
+      await prepareBarcode(orderId);
+      await exportPdf({ id: orderId });
+    } else {
+      throw new Error(result.message || "アップロード失敗");
     }
+  } catch (err) {
+    console.error(err);
+    completeMessage.innerHTML = '⚠️ 注文に失敗しました。もう一度お試しください。';
+    completeMessage.style.color = 'red';
+  }
 
-    completeMessage.style.display = 'block';
-    completeBtn.disabled = false;
-    completeBtn.textContent = '✅ この内容で注文を完了する';
-  });
+  completeMessage.style.display = 'block';
+  completeBtn.disabled = false;
+  completeBtn.textContent = '✅ この内容で注文を完了する';
+});
 
   // A6物理サイズ（mm）
   const A6_MM = { w: 105, h: 148 };
@@ -513,6 +453,7 @@ if (opt.showBarcode && st.barcodeImg) {
   const st = {
     ...state,
     orderId: order.id,
+    fit: photoFitSelect.value,
     message: {
       text: messageInput.value || 'いつもありがとう！',
       pos: textAlignInput.value,
@@ -575,6 +516,3 @@ if (opt.showBarcode && st.barcodeImg) {
     state.orderId = orderId;
     state.barcodeImg = await makeBarcodeImage(orderId, 160);
   }
-
-
-
