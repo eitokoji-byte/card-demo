@@ -25,6 +25,7 @@ function getOptions(mode) {
   const textAlignInput = document.getElementById('textAlign');
   const photoInput = document.getElementById('photoInput');
   const saveBtn = document.getElementById('saveBtn');
+  const photoFitSelect = document.getElementById('photoFit');
   let uploadedImage = null;
 
   // 初期設定
@@ -73,6 +74,7 @@ function drawCanvas() {
     ...state,
     bg: backgroundImages[templateSelect.value],
     photo: uploadedImage,
+    fit: photoFitSelect.value,
     message: {
       text: messageInput.value || 'いつもありがとう！',
       pos: textAlignInput.value,
@@ -165,6 +167,8 @@ saveBtn.addEventListener('click', async () => {
     await ensureFontLoaded(fontFamily);
     drawCanvas();
   });
+  
+  photoFitSelect.addEventListener('change', drawCanvas);
 
   // 初期ロード時にフォントを全部ロード
   window.addEventListener('load', async () => {
@@ -556,4 +560,5 @@ if (opt.showBarcode && st.barcodeImg) {
     state.orderId = orderId;
     state.barcodeImg = await makeBarcodeImage(orderId, 160);
   }
+
 
