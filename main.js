@@ -356,33 +356,48 @@ async function drawCard(ctx, W, H, st, opt = getOptions(MODE.PREVIEW)) {
     ctx.drawImage(bg, 0, 0, W, H);
   }
 
-  // 写真ブロック
+// 写真ブロック
 if (st.photo) {
-  const targetW = W;                      // 横幅いっぱい
-  const targetH = Math.round(H * 0.8);   // 縦はカードの75%くらい
-  const offsetX = 0;                      // 左右余白なし
-  const offsetY = Math.round(H * 0.05);   // 上に余白5%
+  const targetW = W;                     // 横幅いっぱい
+  const targetH = Math.round(H * 0.8);   // 縦はカードの80%くらい
+  const offsetX = 0;                     
+  const offsetY = Math.round(H * 0.05);  // 上に余白5%
 
-  // アスペクト比維持してリサイズ
+  // アスペクト比
   const imgRatio = st.photo.width / st.photo.height;
   const boxRatio = targetW / targetH;
 
-  let drawW, drawH;
-  if (imgRatio > boxRatio) {
-    // 横長 → 幅を合わせる
-    drawW = targetW;
-    drawH = targetW / imgRatio;
+  let drawW, drawH, dx, dy;
+
+  if (st.fit === "cover") {
+    // --- カバー（枠いっぱいに拡大、はみ出しOK）
+    if (imgRatio > boxRatio) {
+      // 横長 → 高さ基準
+      drawH = targetH;
+      drawW = targetH * imgRatio;
+    } else {
+      // 縦長 → 幅基準
+      drawW = targetW;
+      drawH = targetW / imgRatio;
+    }
   } else {
-    // 縦長 → 高さを合わせる
-    drawH = targetH;
-    drawW = targetH * imgRatio;
+    // --- コンテイン（全部収める、余白あり）
+    if (imgRatio > boxRatio) {
+      // 横長 → 幅基準
+      drawW = targetW;
+      drawH = targetW / imgRatio;
+    } else {
+      // 縦長 → 高さ基準
+      drawH = targetH;
+      drawW = targetH * imgRatio;
+    }
   }
 
-  // 中央揃え（上下余白の範囲内で配置）
-  const dx = offsetX + (targetW - drawW) / 2;
-  const dy = offsetY + (targetH - drawH) / 2;
+  // 中央寄せ
+  dx = offsetX + (targetW - drawW) / 2;
+  dy = offsetY + (targetH - drawH) / 2;
 
-  // 枠（白フチ）を付けたい場合
+  // 枠（白フチ）
   if (opt.showFrame) {
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.18)';
@@ -392,9 +407,9 @@ if (st.photo) {
     ctx.restore();
   }
 
-  // 角丸なしでそのまま描画
   ctx.drawImage(st.photo, dx, dy, drawW, drawH);
 }
+
 
 
   // メッセージ（白帯＋文字）
@@ -560,5 +575,6 @@ if (opt.showBarcode && st.barcodeImg) {
     state.orderId = orderId;
     state.barcodeImg = await makeBarcodeImage(orderId, 160);
   }
+
 
 
